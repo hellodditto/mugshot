@@ -23,16 +23,31 @@ mugshot is a tiny native macOS app. By default it's completely invisible — no 
 icon, no menu bar icon (you can turn one on in Settings). It sits idle on an
 FSEvents subscription and only wakes when the screenshot folder actually changes.
 
+## Install
+
+### Homebrew (recommended)
+
+```bash
+brew install --cask hellodditto/tap/mugshot
+```
+
+Installs a signed and notarized `Mugshot.app` into `/Applications` — no
+Gatekeeper hoops. Launch it once and answer the three onboarding questions.
+
+You can also grab `Mugshot-<version>.zip` directly from
+[Releases](https://github.com/hellodditto/mugshot/releases).
+
 ## Requirements
 
 - macOS 13 (Ventura) or later
-- Xcode command line tools (to build; no Xcode project needed). `swift test`
-  needs a full Xcode install, though — `XCTest` isn't shipped with the
-  Command Line Tools. Building/running the app (`make app` / `make run`)
-  works fine with just the CLT, as long as `DEVELOPER_DIR` points at an
-  installed Xcode if you have one (e.g. `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`).
+- To build from source: Xcode command line tools (no Xcode project needed).
+  `swift test` needs a full Xcode install, though — `XCTest` isn't shipped
+  with the Command Line Tools. Building/running the app (`make app` /
+  `make run`) works fine with just the CLT, as long as `DEVELOPER_DIR`
+  points at an installed Xcode if you have one
+  (e.g. `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`).
 
-## Build & run
+## Build & run (from source)
 
 ```bash
 git clone https://github.com/hellodditto/mugshot && cd mugshot
@@ -116,7 +131,9 @@ Core logic lives in `Sources/MugshotCore` (pure, tested); the app shell
 ## Caveats
 
 - macOS only, 13+.
-- The build is ad-hoc signed; distribution signing/notarization is not set up yet.
+- Homebrew/Release builds are Developer ID-signed and notarized. A local
+  `make app` build is only ad-hoc signed — fine on your own machine, but
+  don't distribute it.
 
 ## License
 

@@ -26,6 +26,14 @@ enum SystemSettings {
 
     private static func restartUIServer() {
         run("/usr/bin/killall", ["SystemUIServer"])
+        // On macOS 26 launchd no longer respawns SystemUIServer after a
+        // killall, which leaves the screenshot hotkeys dead until relogin.
+        // Give it a moment, then relaunch it ourselves if it didn't return.
+        DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + 2) {
+            if run("/usr/bin/pgrep", ["-x", "SystemUIServer"]) == nil {
+                run("/usr/bin/open", ["-a", "SystemUIServer"])
+            }
+        }
     }
 
     static func screenshotLocation() -> String {
