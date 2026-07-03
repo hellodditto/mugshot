@@ -66,12 +66,32 @@ jobs:
           spctl --assess --type execute build/Mugshot.app
           rm -f "$RUNNER_TEMP/asc.p8"
 
-      - name: Package
+      - name: Package (zip + drag-to-Applications DMG)
         id: package
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: |
           VER="${GITHUB_REF_NAME#v}"
           ditto -c -k --keepParent build/Mugshot.app "Mugshot-$VER.zip"
-          shasum -a 256 "Mugshot-$VER.zip" | tee checksums.txt
+
+          mkdir dmg-stage
+          cp -R build/Mugshot.app dmg-stage/
+          ln -s /Applications dmg-stage/Applications
+          hdiutil create -volname "mugshot $VER" -srcfolder dmg-stage \
+            -ov -format UDZO "Mugshot-$VER.dmg"
+          codesign --force --sign "$SIGN_IDENTITY" --timestamp "Mugshot-$VER.dmg"
+
+          # Notarize the DMG itself so it mounts clean even offline.
+          printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc.p8"
+          xcrun notarytool submit "Mugshot-$VER.dmg" \
+            --key "$RUNNER_TEMP/asc.p8" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" \
+            --wait --timeout 30m
+          xcrun stapler staple "Mugshot-$VER.dmg"
+          rm -f "$RUNNER_TEMP/asc.p8"
+
+          shasum -a 256 "Mugshot-$VER.zip" "Mugshot-$VER.dmg" | tee checksums.txt
           echo "version=$VER" >> "$GITHUB_OUTPUT"
           echo "sha256=$(shasum -a 256 "Mugshot-$VER.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
@@ -80,7 +100,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            "Mugshot-${{ steps.package.outputs.version }}.zip" checksums.txt \
+            "Mugshot-${{ steps.package.outputs.version }}.zip" \
+            "Mugshot-${{ steps.package.outputs.version }}.dmg" \
+            checksums.txt \
             --title "mugshot ${{ steps.package.outputs.version }}" \
             --generate-notes
 

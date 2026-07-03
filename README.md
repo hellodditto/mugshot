@@ -58,7 +58,8 @@ Took five shots in a row? The panel works through them one by one and shows
 brew install --cask hellodditto/tap/mugshot
 ```
 
-Or grab `Mugshot-<version>.zip` from [Releases](https://github.com/hellodditto/mugshot/releases).
+Or grab the `.dmg` (drag to Applications) or `.zip` from
+[Releases](https://github.com/hellodditto/mugshot/releases) — both signed and notarized.
 
 Launch it once and answer the three onboarding questions:
 
