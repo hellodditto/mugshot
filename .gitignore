@@ -5,3 +5,4 @@
 docs/superpowers/
 .build/
 build/
+.worktrees/

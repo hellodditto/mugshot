@@ -1,0 +1,103 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+env:
+  SIGN_IDENTITY: "Developer ID Application: Junbeom Park (97JHJCBRHG)"
+
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Verify tag matches source version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          SRC=$(sed -n 's/^public let MugshotVersion = "\(.*\)"$/\1/p' Sources/MugshotCore/Version.swift)
+          PLIST=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' scripts/Info.plist)
+          if [ "$TAG" != "$SRC" ] || [ "$TAG" != "$PLIST" ]; then
+            echo "::error::version mismatch — tag=$TAG Version.swift=$SRC Info.plist=$PLIST"
+            exit 1
+          fi
+
+      - name: Build universal app
+        run: MUGSHOT_UNIVERSAL=1 make app
+
+      - name: Import signing certificate into temporary keychain
+        env:
+          P12_B64: ${{ secrets.SIGNING_CERT_P12_BASE64 }}
+          P12_PW: ${{ secrets.SIGNING_CERT_PASSWORD }}
+        run: |
+          KEYCHAIN="$RUNNER_TEMP/release.keychain-db"
+          KC_PW=$(uuidgen)
+          echo "$P12_B64" | base64 -d > "$RUNNER_TEMP/cert.p12"
+          security create-keychain -p "$KC_PW" "$KEYCHAIN"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN"
+          security unlock-keychain -p "$KC_PW" "$KEYCHAIN"
+          security import "$RUNNER_TEMP/cert.p12" -P "$P12_PW" -A -t cert -f pkcs12 -k "$KEYCHAIN"
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$KC_PW" "$KEYCHAIN" > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN" login.keychain
+          rm -f "$RUNNER_TEMP/cert.p12"
+
+      - name: Sign (Developer ID, hardened runtime)
+        run: |
+          codesign --force --options runtime --timestamp \
+            --sign "$SIGN_IDENTITY" build/Mugshot.app
+          codesign --verify --strict --deep build/Mugshot.app
+
+      - name: Notarize and staple
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          printf '%s' "$ASC_KEY_P8" > "$RUNNER_TEMP/asc.p8"
+          ditto -c -k --keepParent build/Mugshot.app "$RUNNER_TEMP/notarize.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" \
+            --key "$RUNNER_TEMP/asc.p8" --key-id "$ASC_KEY_ID" --issuer "$ASC_ISSUER_ID" \
+            --wait --timeout 30m
+          xcrun stapler staple build/Mugshot.app
+          spctl --assess --type execute build/Mugshot.app
+          rm -f "$RUNNER_TEMP/asc.p8"
+
+      - name: Package
+        id: package
+        run: |
+          VER="${GITHUB_REF_NAME#v}"
+          ditto -c -k --keepParent build/Mugshot.app "Mugshot-$VER.zip"
+          shasum -a 256 "Mugshot-$VER.zip" | tee checksums.txt
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "sha256=$(shasum -a 256 "Mugshot-$VER.zip" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            "Mugshot-${{ steps.package.outputs.version }}.zip" checksums.txt \
+            --title "mugshot ${{ steps.package.outputs.version }}" \
+            --generate-notes
+
+      - name: Update Homebrew tap cask
+        env:
+          TAP_TOKEN: ${{ secrets.TAP_PUSH_TOKEN }}
+          VER: ${{ steps.package.outputs.version }}
+          SHA: ${{ steps.package.outputs.sha256 }}
+        run: |
+          git clone "https://x-access-token:${TAP_TOKEN}@github.com/hellodditto/homebrew-tap.git" tap
+          cd tap
+          sed -i '' -e "s/^  version \".*\"/  version \"$VER\"/" \
+                    -e "s/^  sha256 \".*\"/  sha256 \"$SHA\"/" Casks/mugshot.rb
+          git config user.name hellodditto
+          git config user.email hellodditto@users.noreply.github.com
+          git add Casks/mugshot.rb
+          git commit -m "mugshot $VER"
+          git push
+          # If this step ever fails, the release above is still valid —
+          # re-run just this job after fixing the tap.
