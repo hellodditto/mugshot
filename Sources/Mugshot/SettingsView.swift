@@ -2,7 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject private var settings = AppSettings.shared
-    @AppStorage("showMenuBarIcon") private var showMenuBarIcon = false
+    @AppStorage("showMenuBarIcon") private var showMenuBarIcon = true
     @State private var launchAtLogin = LoginItem.isEnabled
     @State private var thumbnailOff = !SystemSettings.thumbnailEnabled()
     @State private var confirmRevert = false

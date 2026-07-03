@@ -19,9 +19,10 @@ folder for six months, guilty of a crime nobody remembers.
 4. Or you hit **Nah, skip** (or Esc) — the file keeps its original name, untouched.
    Ignore the panel and it gives up after 2 minutes, same thing.
 
-mugshot is a tiny native macOS app. By default it's completely invisible — no Dock
-icon, no menu bar icon (you can turn one on in Settings). It sits idle on an
-FSEvents subscription and only wakes when the screenshot folder actually changes.
+mugshot is a tiny native macOS app with no Dock icon — just a small 📷 menu bar
+icon for pause/settings/quit (turn it off in Settings if you'd rather have
+mugshot fully invisible). It sits idle on an FSEvents subscription and only
+wakes when the screenshot folder actually changes.
 
 ## Install
 
@@ -76,11 +77,9 @@ restores it). By hand: **Cmd-Shift-5 → Options → uncheck "Show Floating Thum
 
 ## Settings
 
-Open Settings by launching Mugshot.app again while it's running (the app has no
-Dock icon or menu bar item by default, so re-launching it is what brings
-Settings to the front), or press `⌘,` while the onboarding window is
-frontmost. Once you're in Settings you can enable the menu bar icon for
-quicker access next time. You can:
+Open Settings from the 📷 menu bar icon. If you've hidden that icon,
+launching Mugshot.app again while it's running also brings Settings to the
+front (the app has no Dock icon). You can:
 
 - change the watched folder (also moves the macOS screenshot location)
 - toggle the floating thumbnail, menu bar icon, and launch-at-login

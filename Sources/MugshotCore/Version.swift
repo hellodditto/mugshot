@@ -1,1 +1,1 @@
-public let MugshotVersion = "0.2.1"
+public let MugshotVersion = "0.2.2"

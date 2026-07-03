@@ -3,7 +3,7 @@ import SwiftUI
 @main
 struct MugshotApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @AppStorage("showMenuBarIcon") private var showMenuBarIcon = false
+    @AppStorage("showMenuBarIcon") private var showMenuBarIcon = true
     @ObservedObject private var settings = AppSettings.shared
 
     var body: some Scene {
