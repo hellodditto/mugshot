@@ -23,7 +23,7 @@ public struct LocaleStrings {
         }
         if msgs.isEmpty { msgs = ["📸 Name this screenshot"] }
         return LocaleStrings(
-            dialogTitle: lookup("dialog.title") ?? "📸 mugshot",
+            dialogTitle: lookup("dialog.title") ?? "📸 Mugshot",
             btnSkip: lookup("btn.skip") ?? "Skip",
             btnSave: lookup("btn.save") ?? "Save",
             fieldPlaceholder: lookup("field.placeholder") ?? "Why did you take this?",

@@ -12,7 +12,7 @@ enum LoginItem {
                 try SMAppService.mainApp.unregister()
             }
         } catch {
-            NSLog("mugshot: login item change failed: \(error)")
+            NSLog("Mugshot: login item change failed: \(error)")
         }
     }
 }

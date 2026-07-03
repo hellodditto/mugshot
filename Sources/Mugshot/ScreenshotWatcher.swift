@@ -27,12 +27,12 @@ final class ScreenshotWatcher {
             FSEventStreamCreateFlags(kFSEventStreamCreateFlagNone))
 
         guard let stream else {
-            NSLog("mugshot: FSEventStreamCreate failed for \(path)")
+            NSLog("Mugshot: FSEventStreamCreate failed for \(path)")
             return
         }
         FSEventStreamSetDispatchQueue(stream, .main)
         if !FSEventStreamStart(stream) {
-            NSLog("mugshot: FSEventStreamStart failed for \(path)")
+            NSLog("Mugshot: FSEventStreamStart failed for \(path)")
         }
     }
 

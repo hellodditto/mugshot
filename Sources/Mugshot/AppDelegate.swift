@@ -32,7 +32,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             self?.startWatching()
         }
         let win = NSWindow(contentViewController: NSHostingController(rootView: view))
-        win.title = "mugshot"
+        win.title = "Mugshot"
         win.styleMask = [.titled, .closable]
         win.isReleasedWhenClosed = false
         win.center()

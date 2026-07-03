@@ -9,27 +9,27 @@ struct OnboardingView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("📸 Welcome to mugshot")
+            Text("📸 Welcome to Mugshot")
                 .font(.title2).bold()
-            Text("You take a screenshot. mugshot asks why. The file gets renamed to your answer.")
+            Text("You take a screenshot. Mugshot asks why. The file gets renamed to your answer.")
                 .foregroundStyle(.secondary)
 
             Toggle(isOn: $useDedicated) {
                 VStack(alignment: .leading) {
                     Text("Use a dedicated ~/Screenshots folder")
-                    Text("Switches the macOS screenshot location; keeps your desktop clean. Reverted if you ever revert mugshot.")
+                    Text("Switches the macOS screenshot location; keeps your desktop clean. Reverted if you ever revert Mugshot.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
             Toggle(isOn: $disableThumbnail) {
                 VStack(alignment: .leading) {
                     Text("Turn off the floating screenshot thumbnail")
-                    Text("The thumbnail delays the file write, so mugshot's dialog appears late. Recommended.")
+                    Text("The thumbnail delays the file write, so Mugshot's dialog appears late. Recommended.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
             }
             Toggle(isOn: $launchAtLogin) {
-                Text("Launch mugshot at login")
+                Text("Launch Mugshot at login")
             }
 
             HStack {

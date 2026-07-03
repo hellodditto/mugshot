@@ -1,6 +1,6 @@
 import Foundation
 
-/// Reads/writes the two macOS screencapture settings mugshot touches,
+/// Reads/writes the two macOS screencapture settings Mugshot touches,
 /// via the `defaults` CLI — identical semantics to the Bash version.
 enum SystemSettings {
     @discardableResult

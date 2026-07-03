@@ -40,7 +40,7 @@ final class LocaleStringsTests: XCTestCase {
     func testMissingBundleFallsBackToEnglishDefaults() {
         let empty = Bundle(url: URL(fileURLWithPath: NSTemporaryDirectory()))!
         let s = LocaleStrings.load(bundle: empty)
-        XCTAssertEqual(s.dialogTitle, "📸 mugshot")
+        XCTAssertEqual(s.dialogTitle, "📸 Mugshot")
         XCTAssertEqual(s.btnSkip, "Skip")
         XCTAssertEqual(s.btnSave, "Save")
         XCTAssertEqual(s.messages, ["📸 Name this screenshot"])

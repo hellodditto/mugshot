@@ -7,14 +7,14 @@ struct MugshotApp: App {
     @ObservedObject private var settings = AppSettings.shared
 
     var body: some Scene {
-        MenuBarExtra("mugshot", systemImage: "camera.viewfinder",
+        MenuBarExtra("Mugshot", systemImage: "camera.viewfinder",
                      isInserted: $showMenuBarIcon) {
             Button(settings.paused ? "Resume watching" : "Pause watching") {
                 settings.paused.toggle()
             }
             settingsButton
             Divider()
-            Button("Quit mugshot") { NSApp.terminate(nil) }
+            Button("Quit Mugshot") { NSApp.terminate(nil) }
         }
         Settings { SettingsView() }
     }

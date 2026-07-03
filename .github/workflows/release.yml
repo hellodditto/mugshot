@@ -79,7 +79,7 @@ jobs:
           mkdir dmg-stage
           cp -R build/Mugshot.app dmg-stage/
           ln -s /Applications dmg-stage/Applications
-          hdiutil create -volname "mugshot $VER" -srcfolder dmg-stage \
+          hdiutil create -volname "Mugshot $VER" -srcfolder dmg-stage \
             -ov -format UDZO "Mugshot-$VER.dmg"
           codesign --force --sign "$SIGN_IDENTITY" --timestamp "Mugshot-$VER.dmg"
 
@@ -103,7 +103,7 @@ jobs:
             "Mugshot-${{ steps.package.outputs.version }}.zip" \
             "Mugshot-${{ steps.package.outputs.version }}.dmg" \
             checksums.txt \
-            --title "mugshot ${{ steps.package.outputs.version }}" \
+            --title "Mugshot ${{ steps.package.outputs.version }}" \
             --generate-notes
 
       - name: Update Homebrew tap cask
@@ -119,7 +119,7 @@ jobs:
           git config user.name hellodditto
           git config user.email hellodditto@users.noreply.github.com
           git add Casks/mugshot.rb
-          git commit -m "mugshot $VER"
+          git commit -m "Mugshot $VER"
           git push
           # If this step ever fails, the release above is still valid —
           # re-run just this job after fixing the tap.

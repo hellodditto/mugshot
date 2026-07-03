@@ -1,8 +1,8 @@
 <div align="center">
 
-# 📸 mugshot
+# 📸 Mugshot
 
-**You take a screenshot. mugshot asks why. The file gets renamed to your answer.**
+**You take a screenshot. Mugshot asks why. The file gets renamed to your answer.**
 
 No more `Screenshot 2026-07-02 at 14.32.07.png` sitting anonymously in a folder
 for six months, guilty of a crime nobody remembers.
@@ -67,7 +67,7 @@ Launch it once and answer the three onboarding questions:
   (keeps your desktop clean; the original location is remembered)
 - Turn off the macOS floating screenshot thumbnail? (recommended — see
   [the gotcha](#the-floating-thumbnail-gotcha) below)
-- Launch mugshot at login?
+- Launch Mugshot at login?
 
 ## Settings
 
@@ -76,17 +76,17 @@ just launch Mugshot.app again while it's running.
 
 | Setting | What it does |
 |---|---|
-| Watched folder | Where mugshot looks — changing it also moves the macOS screenshot location |
+| Watched folder | Where Mugshot looks — changing it also moves the macOS screenshot location |
 | Floating thumbnail | Toggle the system thumbnail (off = snappier panel) |
 | Clipboard copy | Put the renamed file on the clipboard after each save |
 | Menu bar icon | Show/hide the 📷 icon |
 | Launch at login | Self-explanatory |
-| **Revert everything & quit** | Restores the original screenshot location and thumbnail setting, removes the login item, forgets all settings, optionally strips mugshot's seen-tags. Files you renamed are never touched. |
+| **Revert everything & quit** | Restores the original screenshot location and thumbnail setting, removes the login item, forgets all settings, optionally strips Mugshot's seen-tags. Files you renamed are never touched. |
 
 ## The floating thumbnail gotcha
 
 macOS's screenshot thumbnail (the little preview in the corner) delays
-*actually writing the file to disk* until it dismisses. mugshot only reacts
+*actually writing the file to disk* until it dismisses. Mugshot only reacts
 once the file exists, so the panel appears late while the thumbnail is on.
 Onboarding offers to turn it off (reverting restores it). By hand:
 **⌘⇧5 → Options → uncheck "Show Floating Thumbnail"**.
@@ -127,9 +127,9 @@ make clean
 
 ## Security and trust
 
-- **No network calls.** mugshot never talks to the internet.
+- **No network calls.** Mugshot never talks to the internet.
 - **No secrets.** Nothing to configure involves credentials or tokens.
-- **System changes require your consent.** The only macOS settings mugshot
+- **System changes require your consent.** The only macOS settings Mugshot
   touches are the screenshot save location and the floating-thumbnail toggle,
   only after you say yes — and both are restored by "Revert everything".
 

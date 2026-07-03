@@ -1,6 +1,6 @@
 import Foundation
 
-/// Marks screenshots mugshot has already prompted for, so a skipped file is
+/// Marks screenshots Mugshot has already prompted for, so a skipped file is
 /// never asked about twice. The key is static (no username embedded — xattrs
 /// travel with shared files via AirDrop/zip/external drives, and the old
 /// per-user key leaked the macOS short username). Files marked by older

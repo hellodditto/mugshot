@@ -28,7 +28,7 @@ final class AppSettings: ObservableObject {
         set { d.set(newValue, forKey: "previousLocation") }
     }
 
-    /// Non-nil means mugshot turned the floating thumbnail off.
+    /// Non-nil means Mugshot turned the floating thumbnail off.
     var previousThumbnail: String? {
         get { d.string(forKey: "previousThumbnail") }
         set { d.set(newValue, forKey: "previousThumbnail") }
