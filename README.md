@@ -1,138 +1,136 @@
-# mugshot
+<div align="center">
 
-You take a screenshot. mugshot asks why. The file gets renamed to your answer.
+# 📸 mugshot
 
-That's it. No more `Screenshot 2026-07-02 at 14.32.07.png` sitting anonymously in a
-folder for six months, guilty of a crime nobody remembers.
+**You take a screenshot. mugshot asks why. The file gets renamed to your answer.**
 
-> _Demo GIF coming soon._
+No more `Screenshot 2026-07-02 at 14.32.07.png` sitting anonymously in a folder
+for six months, guilty of a crime nobody remembers.
 
-## What it does
-
-1. You press `⌘⇧4` (or `⌘⇧3`, or whatever) and take a screenshot.
-2. A small floating panel appears in the corner: *"State the identity of this capture."*
-3. You type a reason and hit **Book it 💾** (or just press Enter) — the screenshot is
-   renamed to `<your reason> <original date & time>.png` (e.g.
-   `q3 roadmap 2026-07-02 at 14.32.07.png`), so it still sorts chronologically
-   next to its untouched siblings. If the original name has no date, it's just
-   `<your reason>.png`.
-4. Or you hit **Nah, skip** (or Esc) — the file keeps its original name, untouched.
-   Ignore the panel and it gives up after 2 minutes, same thing.
-
-mugshot is a tiny native macOS app with no Dock icon — just a small 📷 menu bar
-icon for pause/settings/quit (turn it off in Settings if you'd rather have
-mugshot fully invisible). It sits idle on an FSEvents subscription and only
-wakes when the screenshot folder actually changes.
-
-## Install
-
-### Homebrew (recommended)
+[![Release](https://img.shields.io/github/v/release/hellodditto/mugshot?color=blue)](https://github.com/hellodditto/mugshot/releases)
+[![CI](https://github.com/hellodditto/mugshot/actions/workflows/ci.yml/badge.svg)](https://github.com/hellodditto/mugshot/actions/workflows/ci.yml)
+![Platform](https://img.shields.io/badge/macOS-13%2B-black?logo=apple)
+[![License](https://img.shields.io/badge/license-Apache--2.0-green)](LICENSE)
 
 ```bash
 brew install --cask hellodditto/tap/mugshot
 ```
 
-Installs a signed and notarized `Mugshot.app` into `/Applications` — no
-Gatekeeper hoops. Launch it once and answer the three onboarding questions.
+> _Demo GIF coming soon._
 
-You can also grab `Mugshot-<version>.zip` directly from
-[Releases](https://github.com/hellodditto/mugshot/releases).
+</div>
 
-## Requirements
+---
 
-- macOS 13 (Ventura) or later
-- To build from source: Xcode command line tools (no Xcode project needed).
-  `swift test` needs a full Xcode install, though — `XCTest` isn't shipped
-  with the Command Line Tools. Building/running the app (`make app` /
-  `make run`) works fine with just the CLT, as long as `DEVELOPER_DIR`
-  points at an installed Xcode if you have one
-  (e.g. `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`).
+## How the booking goes
 
-## Build & run (from source)
+1. **Capture** — `⌘⇧4`, `⌘⇧3`, or a `⌘⇧5` screen recording. Anything macOS drops
+   in your screenshot folder.
+2. **Interrogate** — a small floating panel slides into the corner:
+   *"State the identity of this capture."* It never steals focus from what
+   you're doing.
+3. **Book it 💾** — type a reason, hit <kbd>Enter</kbd>. A green checkmark, and
+   the file becomes `<your reason> <original date & time>.png` — it still sorts
+   chronologically next to its untouched siblings. The renamed file is already
+   on your clipboard: **`⌘V` pastes it anywhere.**
+4. **Or let it walk** — <kbd>Esc</kbd> (or ignoring the panel for 2 minutes)
+   keeps the original name, untouched, and it's never asked about again.
+
+Took five shots in a row? The panel works through them one by one and shows
+`(+N)` for the suspects still waiting.
+
+## What makes it pleasant
+
+| | |
+|---|---|
+| 🫥 **Invisible by default** | No Dock icon. Just a small 📷 menu bar icon for pause / settings / quit — and you can turn even that off. |
+| ⚡ **No polling, no daemon churn** | An `FSEvents` subscription sleeps until the screenshot folder actually changes. |
+| 🎬 **Recordings too** | `⌘⇧5` screen recordings (`.mov`) get the same booking treatment, thumbnail included. |
+| 📋 **Paste-ready** | After a rename the file sits on your clipboard, Finder-style. (Toggleable — it does replace whatever was there.) |
+| 🌍 **16 languages** | The panel speaks your system language: `en` `ko` `es` `fr` `de` `pt` `it` `ru` `ja` `zh` `ar` `hi` `tr` `nl` `pl` `vi`. |
+| 🔒 **Nothing leaves your Mac** | No network calls, no logs, no analytics. The only trace is the renamed file itself. |
+
+## Install
+
+**Homebrew** (recommended — signed & notarized, no Gatekeeper hoops):
 
 ```bash
-git clone https://github.com/hellodditto/mugshot && cd mugshot
-make run
+brew install --cask hellodditto/tap/mugshot
 ```
 
-`make app` assembles `build/Mugshot.app` (SwiftPM build + bundle script, ad-hoc
-signed). `make run` opens it. On first launch mugshot asks three things:
+Or grab `Mugshot-<version>.zip` from [Releases](https://github.com/hellodditto/mugshot/releases).
 
-- switch your screenshot location to a dedicated `~/Screenshots` folder?
+Launch it once and answer the three onboarding questions:
+
+- Switch your screenshot location to a dedicated `~/Screenshots` folder?
   (keeps your desktop clean; the original location is remembered)
-- turn off the macOS floating screenshot thumbnail? (see below — recommended)
-- launch mugshot at login?
-
-Move `build/Mugshot.app` to `/Applications` if you want it to stick around.
-If you already enabled launch-at-login before moving it, re-toggle that
-setting afterward — the login item was registered against the old path.
-
-## The floating thumbnail gotcha
-
-macOS's screenshot thumbnail (the little preview that pops up in the corner)
-delays *actually writing the file to disk* until it dismisses. Since mugshot
-only reacts once the file exists, the naming panel appears noticeably late if
-the thumbnail is on. Onboarding offers to turn it off (and reverting mugshot
-restores it). By hand: **Cmd-Shift-5 → Options → uncheck "Show Floating Thumbnail"**.
+- Turn off the macOS floating screenshot thumbnail? (recommended — see
+  [the gotcha](#the-floating-thumbnail-gotcha) below)
+- Launch mugshot at login?
 
 ## Settings
 
-Open Settings from the 📷 menu bar icon. If you've hidden that icon,
-launching Mugshot.app again while it's running also brings Settings to the
-front (the app has no Dock icon). You can:
+Open Settings from the 📷 menu bar icon — or, if you've hidden the icon,
+just launch Mugshot.app again while it's running.
 
-- change the watched folder (also moves the macOS screenshot location)
-- toggle the floating thumbnail, menu bar icon, and launch-at-login
-- pause/resume watching from the menu bar icon
-- **Revert everything & quit** — restores the original screenshot location and
-  thumbnail setting, removes the login item, forgets all settings, and
-  optionally strips mugshot's seen-tags from skipped files. Screenshots you
-  already renamed are never touched.
+| Setting | What it does |
+|---|---|
+| Watched folder | Where mugshot looks — changing it also moves the macOS screenshot location |
+| Floating thumbnail | Toggle the system thumbnail (off = snappier panel) |
+| Clipboard copy | Put the renamed file on the clipboard after each save |
+| Menu bar icon | Show/hide the 📷 icon |
+| Launch at login | Self-explanatory |
+| **Revert everything & quit** | Restores the original screenshot location and thumbnail setting, removes the login item, forgets all settings, optionally strips mugshot's seen-tags. Files you renamed are never touched. |
 
-## Localization
+## The floating thumbnail gotcha
 
-The rename panel ships in 16 languages, picked automatically from your system
-language: `en` `ko` `es` `fr` `de` `pt` `it` `ru` `ja` `zh` `ar` `hi` `tr` `nl`
-`pl` `vi`. These are machine translations of a playful "booking"/mugshot theme —
-if something reads wrong in your language, a PR improving
-`Resources/<code>.lproj/Localizable.strings` is very welcome.
+macOS's screenshot thumbnail (the little preview in the corner) delays
+*actually writing the file to disk* until it dismisses. mugshot only reacts
+once the file exists, so the panel appears late while the thumbnail is on.
+Onboarding offers to turn it off (reverting restores it). By hand:
+**⌘⇧5 → Options → uncheck "Show Floating Thumbnail"**.
 
 ## How it works
 
 - An `FSEvents` stream watches your screenshot folder; there is no polling.
 - A new `*.png` counts as a screenshot if macOS tagged it
-  (`kMDItemIsScreenCapture`) or it's named like one (`Screenshot …` /
-  `…YYYY-MM-DD at …`), it's under a minute old, and mugshot hasn't asked about
-  it before (tracked with a `com.hellodditto.mugshot.seen` xattr on the file).
+  (`kMDItemIsScreenCapture`) or it's named like one; a new `*.mov` counts as a
+  screen recording if it carries the system's date-and-time stamp. Either way
+  it must be under a minute old and not previously seen (tracked with a
+  `com.hellodditto.mugshot.seen` xattr on the file).
 - Skip/timeout leaves the file exactly as macOS named it.
 - No log files. The only trace is the renamed file itself.
 
-## Development
+## Building from source
 
 ```bash
-swift test    # unit tests for the core logic (rename, detect, scan, locales)
-make app      # assemble build/Mugshot.app
+git clone https://github.com/hellodditto/mugshot && cd mugshot
+make run      # build + open (first run shows onboarding)
+make app      # just assemble build/Mugshot.app
+swift test    # core-logic unit tests
 make clean
 ```
 
-Core logic lives in `Sources/MugshotCore` (pure, tested); the app shell
-(FSEvents watcher, floating panel, settings) in `Sources/Mugshot`.
+- Requires macOS 13+. Building needs only the Xcode Command Line Tools;
+  `swift test` needs a full Xcode install (XCTest isn't in the CLT — set
+  `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer` if your
+  `xcode-select` points at the CLT).
+- Core logic lives in `Sources/MugshotCore` (pure, tested); the app shell
+  (watcher, panel, settings) in `Sources/Mugshot`.
+- A local `make app` build is ad-hoc signed — fine on your own machine, but
+  don't distribute it. Homebrew/Release builds are Developer ID-signed and
+  notarized by CI.
+- Localization PRs are very welcome — the strings are machine translations of
+  a playful "booking" theme; fix yours in
+  `Resources/<code>.lproj/Localizable.strings`.
 
 ## Security and trust
 
 - **No network calls.** mugshot never talks to the internet.
 - **No secrets.** Nothing to configure involves credentials or tokens.
 - **System changes require your consent.** The only macOS settings mugshot
-  touches are the screenshot save location and the floating-thumbnail toggle
-  (both via `defaults write`), only after you say yes — and both are restored
-  by "Revert everything".
-
-## Caveats
-
-- macOS only, 13+.
-- Homebrew/Release builds are Developer ID-signed and notarized. A local
-  `make app` build is only ad-hoc signed — fine on your own machine, but
-  don't distribute it.
+  touches are the screenshot save location and the floating-thumbnail toggle,
+  only after you say yes — and both are restored by "Revert everything".
 
 ## License
 
