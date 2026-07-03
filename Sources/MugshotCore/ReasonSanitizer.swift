@@ -1,17 +1,21 @@
 import Foundation
 
 public enum ReasonSanitizer {
-    /// Filenames on APFS cap at 255 UTF-8 bytes; leave room for the
-    /// original date/time tail, a collision suffix, and the extension.
+    /// Keeps realistic renames under the 255-byte filename limit (reason +
+    /// date tail + collision suffix + extension). Pathologically long
+    /// original names can still overflow — the rename then fails and the
+    /// panel shows it, leaving the file untouched.
     public static let maxUTF8Bytes = 180
 
     /// Port of the Bash `sanitize()`: drop control characters, replace
     /// `/`, `:`, `\` with spaces, squeeze space runs, trim. On top of the
     /// port: strip leading "."/"-" (dotfile / shell-flag hazards) and cap
-    /// the length so the rename can never exceed the filename limit.
+    /// the length so realistic renames stay under the filename limit.
     public static func sanitize(_ raw: String) -> String {
+        // Bound pasted novels before the quadratic space-squeeze below;
+        // 2048 chars comfortably exceeds anything the byte cap can keep.
         var s = String(String.UnicodeScalarView(
-            raw.unicodeScalars.filter { !CharacterSet.controlCharacters.contains($0) }
+            raw.prefix(2048).unicodeScalars.filter { !CharacterSet.controlCharacters.contains($0) }
         ))
         s = String(s.map { "/:\\".contains($0) ? " " : $0 })
         while s.contains("  ") {

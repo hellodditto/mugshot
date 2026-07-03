@@ -77,11 +77,13 @@ struct PromptView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .stroke(Color.primary.opacity(0.1), lineWidth: 1)
                 )
-        } else if file.pathExtension == "mov" {
+        } else {
             RoundedRectangle(cornerRadius: 6)
                 .fill(.quaternary)
                 .frame(width: 96, height: 72)
-                .overlay(Image(systemName: "video.fill").foregroundStyle(.secondary))
+                .overlay(Image(systemName: file.pathExtension == "mov"
+                               ? "video.fill" : "photo")
+                    .foregroundStyle(.secondary))
         }
     }
 
@@ -103,9 +105,8 @@ struct PromptView: View {
     }
 
     private func loadThumbnail() async -> NSImage? {
-        if file.pathExtension != "mov", let img = NSImage(contentsOf: file) {
-            return img
-        }
+        // QuickLook for images too: it decodes at thumbnail size instead of
+        // pulling a full 5K screenshot into memory for a 96×72 view.
         let request = QLThumbnailGenerator.Request(
             fileAt: file, size: CGSize(width: 192, height: 144),
             scale: 2, representationTypes: .thumbnail)

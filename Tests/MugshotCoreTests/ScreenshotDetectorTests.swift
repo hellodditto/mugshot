@@ -61,3 +61,10 @@ extension ScreenshotDetectorTests {
         XCTAssertFalse(ScreenshotDetector.isScreenRecording(touch("Screenshot 2026-07-03 at 22.10.00.png")))
     }
 }
+
+extension ScreenshotDetectorTests {
+    func testDatedMovWithoutTimeIsNotRecording() {
+        XCTAssertFalse(ScreenshotDetector.isScreenRecording(touch("family-trip-2026-07-03.mov")))
+        XCTAssertFalse(ScreenshotDetector.isScreenRecording(touch("meeting-2026-07-03 notes.mov")))
+    }
+}

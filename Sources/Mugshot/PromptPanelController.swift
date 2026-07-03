@@ -114,9 +114,14 @@ final class PromptPanelController {
             }
             return .saved
         } catch {
-            // File vanished, name collision race, permissions… the original
-            // is untouched; let the view show the failure instead of
-            // silently closing.
+            // If the file itself is gone (trashed mid-prompt), retrying is
+            // futile — resolve the panel like the old worker did.
+            if !FileManager.default.fileExists(atPath: file.path) {
+                dismiss(file: file)
+                return .dismissed
+            }
+            // Otherwise (name too long, permissions, collision race) the
+            // original is untouched; let the view show the failure.
             return .failed
         }
     }
@@ -137,11 +142,14 @@ final class PromptPanelController {
             NSAnimationContext.runAnimationGroup({ ctx in
                 ctx.duration = 0.15
                 panel.animator().alphaValue = 0
-            }, completionHandler: {
+            }, completionHandler: { [weak self] in
                 panel.orderOut(nil)
+                // After the fade, so panels never overlap.
+                Task { @MainActor in self?.showNext() }
             })
+        } else {
+            showNext()
         }
-        showNext()
     }
 
     private func updateTitle() {

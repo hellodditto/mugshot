@@ -9,3 +9,4 @@
 "msg.6" = "Explique maintenant, ou demande-toi pour toujours 'c'était quoi, ça ?'";
 "msg.7" = "Pièce à conviction déposée 🧾 — entre un nom";
 "msg.8" = "Il reste un inconnu, ou tu lui donnes un nom ?";
+"field.placeholder" = "Pourquoi cette capture ?";

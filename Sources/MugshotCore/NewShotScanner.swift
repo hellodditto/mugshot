@@ -22,17 +22,18 @@ public struct NewShotScanner {
 
         return items
             .filter { url in
-                let looksCaptured: Bool
-                switch url.pathExtension {
-                case "png": looksCaptured = ScreenshotDetector.isScreenshot(url)
-                case "mov": looksCaptured = ScreenshotDetector.isScreenRecording(url)
-                default:    looksCaptured = false
-                }
-                guard looksCaptured else { return false }
+                // Cheap gates first: extension, then mtime — the detector and
+                // seen checks hit xattrs (a syscall per file), which must not
+                // run for the thousands of old shots a folder can accumulate.
+                guard ["png", "mov"].contains(url.pathExtension) else { return false }
                 guard let values = try? url.resourceValues(forKeys: Set(keys)),
                       values.isRegularFile == true,
                       let mtime = values.contentModificationDate else { return false }
                 guard now.timeIntervalSince(mtime) <= maxAge else { return false }
+                let looksCaptured = url.pathExtension == "png"
+                    ? ScreenshotDetector.isScreenshot(url)
+                    : ScreenshotDetector.isScreenRecording(url)
+                guard looksCaptured else { return false }
                 return !seen.isSeen(url)
             }
             .map { url in

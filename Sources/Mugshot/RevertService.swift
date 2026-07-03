@@ -38,7 +38,7 @@ enum RevertService {
             let dir = URL(fileURLWithPath: s.watchedFolder)
             let files = (try? FileManager.default.contentsOfDirectory(
                 at: dir, includingPropertiesForKeys: nil)) ?? []
-            for f in files where f.pathExtension == "png" {
+            for f in files where ["png", "mov"].contains(f.pathExtension) {
                 seen.unmark(f)
             }
         }
