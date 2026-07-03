@@ -34,6 +34,11 @@ final class PromptPanelController {
     }
 
     private func showNext() {
+        // A panel (even one mid-fade) means we're busy: enqueue() keeps the
+        // file queued and dismiss()'s completion re-enters here. Without
+        // this guard, an enqueue landing during the 0.15s fade could pop
+        // two files at once — zombie panel, orphaned screenshot.
+        guard panel == nil else { return }
         guard !queue.isEmpty else { return }
         let file = queue.removeFirst()
         guard FileManager.default.fileExists(atPath: file.path) else {
@@ -85,6 +90,7 @@ final class PromptPanelController {
 
         // .common mode so the timeout keeps ticking while a menu or a
         // modal panel (e.g. the Settings folder picker) is tracking.
+        timeoutTimer?.invalidate()   // defensive: never leak a predecessor
         let timer = Timer(timeInterval: timeout, repeats: false) { [weak self] _ in
             Task { @MainActor in self?.dismiss(file: file) }
         }
@@ -138,14 +144,18 @@ final class PromptPanelController {
         timeoutTimer = nil
 
         if let panel {
-            self.panel = nil
+            // Keep self.panel set during the fade: enqueue() must see us as
+            // busy so the next file waits for the completion below.
             NSAnimationContext.runAnimationGroup({ ctx in
                 ctx.duration = 0.15
                 panel.animator().alphaValue = 0
             }, completionHandler: { [weak self] in
                 panel.orderOut(nil)
-                // After the fade, so panels never overlap.
-                Task { @MainActor in self?.showNext() }
+                Task { @MainActor in
+                    guard let self else { return }
+                    if self.panel === panel { self.panel = nil }
+                    self.showNext()
+                }
             })
         } else {
             showNext()

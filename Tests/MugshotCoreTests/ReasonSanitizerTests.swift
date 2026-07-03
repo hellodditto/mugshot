@@ -42,3 +42,19 @@ extension ReasonSanitizerTests {
         XCTAssertEqual(ReasonSanitizer.sanitize(ascii).utf8.count, 180)
     }
 }
+
+extension ReasonSanitizerTests {
+    func testUnicodeWhitespaceOnlyBecomesEmpty() {
+        XCTAssertEqual(ReasonSanitizer.sanitize("\u{00A0}\u{00A0}"), "")
+        XCTAssertEqual(ReasonSanitizer.sanitize("\u{3000} \u{2009}"), "")
+        XCTAssertEqual(ReasonSanitizer.sanitize("\u{00A0}.hidden"), "hidden")
+    }
+
+    func testEmojiZWJSequencesSurvive() {
+        XCTAssertEqual(ReasonSanitizer.sanitize("family 👨‍👩‍👧‍👦 trip"), "family 👨‍👩‍👧‍👦 trip")
+    }
+
+    func testBidiOverridesStillStripped() {
+        XCTAssertEqual(ReasonSanitizer.sanitize("abc\u{202E}gnp.exe"), "abcgnp.exe")
+    }
+}

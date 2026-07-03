@@ -10,7 +10,7 @@ final class LocaleStringsTests: XCTestCase {
         .appendingPathComponent("Resources")
 
     func testAll16LocalesHaveAllKeys() throws {
-        let expected = ["dialog.title", "btn.skip", "btn.save"] + (1...8).map { "msg.\($0)" }
+        let expected = ["dialog.title", "btn.skip", "btn.save", "field.placeholder"] + (1...8).map { "msg.\($0)" }
         let lprojs = try FileManager.default
             .contentsOfDirectory(at: Self.resourcesURL, includingPropertiesForKeys: nil)
             .filter { $0.pathExtension == "lproj" }

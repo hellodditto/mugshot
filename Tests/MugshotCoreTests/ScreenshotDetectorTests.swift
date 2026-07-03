@@ -68,3 +68,14 @@ extension ScreenshotDetectorTests {
         XCTAssertFalse(ScreenshotDetector.isScreenRecording(touch("meeting-2026-07-03 notes.mov")))
     }
 }
+
+extension ScreenshotDetectorTests {
+    func testVersionNumberedMovIsNotRecording() {
+        XCTAssertFalse(ScreenshotDetector.isScreenRecording(touch("video-2026-07-03 v1.20.15 export.mov")))
+        XCTAssertFalse(ScreenshotDetector.isScreenRecording(touch("demo 2026-07-03 version 10.15.30 final.mov")))
+    }
+
+    func testLocalizedRecordingStillMatchesAfterAnchor() {
+        XCTAssertTrue(ScreenshotDetector.isScreenRecording(touch("화면 기록 2026-07-03 오후 11.30.00.mov")))
+    }
+}

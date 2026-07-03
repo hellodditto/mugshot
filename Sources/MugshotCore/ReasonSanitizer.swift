@@ -14,20 +14,28 @@ public enum ReasonSanitizer {
     public static func sanitize(_ raw: String) -> String {
         // Bound pasted novels before the quadratic space-squeeze below;
         // 2048 chars comfortably exceeds anything the byte cap can keep.
+        // Drop Cc controls and bidi embedding/override marks (filename
+        // spoofing), but keep other format chars — ZWJ must survive or
+        // family/profession emoji shred into their components.
         var s = String(String.UnicodeScalarView(
-            raw.prefix(2048).unicodeScalars.filter { !CharacterSet.controlCharacters.contains($0) }
+            raw.prefix(2048).unicodeScalars.filter { scalar in
+                if scalar.properties.generalCategory == .control { return false }
+                if (0x202A...0x202E).contains(scalar.value) { return false }
+                if (0x2066...0x2069).contains(scalar.value) { return false }
+                return true
+            }
         ))
         s = String(s.map { "/:\\".contains($0) ? " " : $0 })
         while s.contains("  ") {
             s = s.replacingOccurrences(of: "  ", with: " ")
         }
-        s = s.trimmingCharacters(in: CharacterSet(charactersIn: " "))
-        while let f = s.first, f == "." || f == "-" || f == " " {
+        s = s.trimmingCharacters(in: .whitespaces)
+        while let f = s.first, f == "." || f == "-" || f.isWhitespace {
             s.removeFirst()
         }
         while s.utf8.count > maxUTF8Bytes {
             s.removeLast()
         }
-        return s.trimmingCharacters(in: CharacterSet(charactersIn: " "))
+        return s.trimmingCharacters(in: .whitespaces)
     }
 }
