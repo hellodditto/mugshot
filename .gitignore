@@ -1,0 +1,7 @@
+.superpowers/
+*.log
+.DS_Store
+/tmp/
+docs/superpowers/
+.build/
+build/
