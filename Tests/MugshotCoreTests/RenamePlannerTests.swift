@@ -61,3 +61,11 @@ final class RenamePlannerTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: f.path))
     }
 }
+
+extension RenamePlannerTests {
+    func testMovKeepsExtensionAndDateTail() {
+        let f = touch("Screen Recording 2026-07-03 at 22.10.00.mov")
+        XCTAssertEqual(RenamePlanner.targetURL(for: f, reason: "데모 녹화").lastPathComponent,
+                       "데모 녹화 2026-07-03 at 22.10.00.mov")
+    }
+}

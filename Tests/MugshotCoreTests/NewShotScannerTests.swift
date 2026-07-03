@@ -64,3 +64,15 @@ final class NewShotScannerTests: XCTestCase {
         XCTAssertEqual(s.findNew(), [])
     }
 }
+
+extension NewShotScannerTests {
+    func testFindsRecentScreenRecordingMov() throws {
+        let f = try touch("Screen Recording 2026-07-03 at 22.10.00.mov")
+        XCTAssertEqual(scanner.findNew(), [f])
+    }
+
+    func testIgnoresRandomMov() throws {
+        try touch("holiday-video.mov")
+        XCTAssertEqual(scanner.findNew(), [])
+    }
+}

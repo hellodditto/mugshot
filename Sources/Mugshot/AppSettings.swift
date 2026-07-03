@@ -12,6 +12,11 @@ final class AppSettings: ObservableObject {
     /// Menu-bar pause; intentionally not persisted across launches.
     @Published var paused = false
 
+    /// Put the renamed file on the clipboard so it can be pasted right away.
+    @Published var copyAfterRename: Bool {
+        didSet { d.set(copyAfterRename, forKey: "copyAfterRename") }
+    }
+
     var onboardingDone: Bool {
         get { d.bool(forKey: "onboardingDone") }
         set { d.set(newValue, forKey: "onboardingDone") }
@@ -33,5 +38,6 @@ final class AppSettings: ObservableObject {
         d = defaults
         watchedFolder = defaults.string(forKey: "watchedFolder")
             ?? SystemSettings.screenshotLocation()
+        copyAfterRename = defaults.object(forKey: "copyAfterRename") as? Bool ?? true
     }
 }

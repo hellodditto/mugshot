@@ -37,6 +37,8 @@ struct SettingsView: View {
                             settings.previousThumbnail = nil
                         }
                     }
+                Toggle("Copy renamed file to the clipboard (paste it anywhere)",
+                       isOn: $settings.copyAfterRename)
                 Toggle("Show menu bar icon", isOn: $showMenuBarIcon)
                 Toggle("Launch at login", isOn: $launchAtLogin)
                     .onChange(of: launchAtLogin) { on in

@@ -15,6 +15,7 @@ final class PromptPanelController {
     private var panel: PromptPanel?
     private var timeoutTimer: Timer?
     private var current: URL?
+    private var currentSaved = false
 
     /// Parity with the osascript dialog's `giving up after 120`.
     private let timeout: TimeInterval = 120
@@ -25,7 +26,11 @@ final class PromptPanelController {
 
     func enqueue(_ url: URL) {
         queue.append(url)
-        if panel == nil { showNext() }
+        if panel == nil {
+            showNext()
+        } else {
+            updateTitle()   // live "+N" badge while a panel is already up
+        }
     }
 
     private func showNext() {
@@ -37,18 +42,24 @@ final class PromptPanelController {
         }
 
         current = file
+        currentSaved = false
 
-        let view = PromptView(file: file, message: strings.randomMessage(),
-                              strings: strings) { [weak self] reason in
-            self?.finish(file: file, reason: reason)
-        }
+        let view = PromptView(
+            file: file,
+            message: strings.randomMessage(),
+            strings: strings,
+            attemptSave: { [weak self] reason in
+                self?.attemptSave(file: file, reason: reason) ?? .dismissed
+            },
+            onDismiss: { [weak self] in
+                self?.dismiss(file: file)
+            })
         let hosting = NSHostingView(rootView: view)
 
         let panel = PromptPanel(
             contentRect: .zero,
             styleMask: [.titled, .nonactivatingPanel],
             backing: .buffered, defer: false)
-        panel.title = strings.dialogTitle
         panel.isFloatingPanel = true
         panel.level = .floating
         panel.hidesOnDeactivate = false
@@ -56,42 +67,95 @@ final class PromptPanelController {
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.contentView = hosting
         panel.setContentSize(hosting.fittingSize)
-        position(panel)
-        panel.makeKeyAndOrderFront(nil)
         self.panel = panel
+        updateTitle()
 
-        timeoutTimer = Timer.scheduledTimer(withTimeInterval: timeout, repeats: false) { [weak self] _ in
-            Task { @MainActor in self?.finish(file: file, reason: nil) }
+        // Slide in from just above the resting spot, like the system
+        // screenshot thumbnail: subtle, short, and skippable by design.
+        let resting = restingOrigin(for: panel)
+        panel.setFrameOrigin(NSPoint(x: resting.x, y: resting.y + 12))
+        panel.alphaValue = 0
+        panel.makeKeyAndOrderFront(nil)
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.18
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            panel.animator().alphaValue = 1
+            panel.animator().setFrameOrigin(resting)
+        }
+
+        // .common mode so the timeout keeps ticking while a menu or a
+        // modal panel (e.g. the Settings folder picker) is tracking.
+        let timer = Timer(timeInterval: timeout, repeats: false) { [weak self] _ in
+            Task { @MainActor in self?.dismiss(file: file) }
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        timeoutTimer = timer
+    }
+
+    /// Sanitize + rename + clipboard. Returns what the view should do next.
+    private func attemptSave(file: URL, reason: String) -> PromptView.SaveOutcome {
+        guard file == current else { return .dismissed }
+        // A double-fired Enter (onSubmit + default action) must not rename
+        // twice — the second call just reports the already-saved state.
+        guard !currentSaved else { return .saved }
+        let clean = ReasonSanitizer.sanitize(reason)
+        if clean.isEmpty {
+            // Parity with the Bash worker: an empty (or emptied) reason is a skip.
+            dismiss(file: file)
+            return .dismissed
+        }
+        do {
+            let target = try RenamePlanner.rename(file, reason: clean)
+            currentSaved = true
+            if AppSettings.shared.copyAfterRename {
+                let pb = NSPasteboard.general
+                pb.clearContents()
+                pb.writeObjects([target as NSURL])
+            }
+            return .saved
+        } catch {
+            // File vanished, name collision race, permissions… the original
+            // is untouched; let the view show the failure instead of
+            // silently closing.
+            return .failed
         }
     }
 
-    private func finish(file: URL, reason: String?) {
-        // Ignore stale completions (e.g. a timeout Task landing after Save already
+    /// Close the current panel (skip, timeout, or after the saved-checkmark
+    /// beat) and move on to the next queued screenshot.
+    private func dismiss(file: URL) {
+        // Ignore stale completions (e.g. a timeout landing after Save already
         // resolved this file and a different panel is now showing).
         guard file == current else { return }
         current = nil
 
         timeoutTimer?.invalidate()
         timeoutTimer = nil
-        panel?.orderOut(nil)
-        panel = nil
 
-        if let reason {
-            let clean = ReasonSanitizer.sanitize(reason)
-            if !clean.isEmpty {
-                // Rename failure (file vanished, permissions) leaves the
-                // original untouched — parity with the Bash worker.
-                _ = try? RenamePlanner.rename(file, reason: clean)
-            }
+        if let panel {
+            self.panel = nil
+            NSAnimationContext.runAnimationGroup({ ctx in
+                ctx.duration = 0.15
+                panel.animator().alphaValue = 0
+            }, completionHandler: {
+                panel.orderOut(nil)
+            })
         }
         showNext()
     }
 
-    private func position(_ panel: NSPanel) {
-        guard let screen = NSScreen.main else { return }
+    private func updateTitle() {
+        guard let panel else { return }
+        panel.title = queue.isEmpty
+            ? strings.dialogTitle
+            : "\(strings.dialogTitle) (+\(queue.count))"
+    }
+
+    private func restingOrigin(for panel: NSPanel) -> NSPoint {
+        guard let screen = NSScreen.main else { return .zero }
         let vf = screen.visibleFrame
         let size = panel.frame.size
-        panel.setFrameOrigin(NSPoint(x: vf.maxX - size.width - 16,
-                                     y: vf.maxY - size.height - 16))
+        return NSPoint(x: vf.maxX - size.width - 16,
+                       y: vf.maxY - size.height - 16)
     }
 }

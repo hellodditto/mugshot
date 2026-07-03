@@ -7,6 +7,7 @@ public struct LocaleStrings {
     public let dialogTitle: String
     public let btnSkip: String
     public let btnSave: String
+    public let fieldPlaceholder: String
     public let messages: [String]
 
     private static let missing = "\u{1}mugshot.missing\u{1}"
@@ -25,6 +26,7 @@ public struct LocaleStrings {
             dialogTitle: lookup("dialog.title") ?? "📸 mugshot",
             btnSkip: lookup("btn.skip") ?? "Skip",
             btnSave: lookup("btn.save") ?? "Save",
+            fieldPlaceholder: lookup("field.placeholder") ?? "Why did you take this?",
             messages: msgs
         )
     }

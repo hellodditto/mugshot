@@ -43,3 +43,21 @@ final class ScreenshotDetectorTests: XCTestCase {
         XCTAssertFalse(ScreenshotDetector.isScreenshot(touch("report 2026-07-01 final.png")))
     }
 }
+
+extension ScreenshotDetectorTests {
+    func testScreenRecordingEnglishName() {
+        XCTAssertTrue(ScreenshotDetector.isScreenRecording(touch("Screen Recording 2026-07-03 at 22.10.00.mov")))
+    }
+
+    func testScreenRecordingLocalizedNameWithDate() {
+        XCTAssertTrue(ScreenshotDetector.isScreenRecording(touch("화면 기록 2026-07-03 오후 10.10.00.mov")))
+    }
+
+    func testRandomMovIsNotRecording() {
+        XCTAssertFalse(ScreenshotDetector.isScreenRecording(touch("holiday-video.mov")))
+    }
+
+    func testPngIsNotRecording() {
+        XCTAssertFalse(ScreenshotDetector.isScreenRecording(touch("Screenshot 2026-07-03 at 22.10.00.png")))
+    }
+}

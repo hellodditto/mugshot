@@ -22,12 +22,17 @@ public struct NewShotScanner {
 
         return items
             .filter { url in
-                guard url.pathExtension == "png" else { return false }
+                let looksCaptured: Bool
+                switch url.pathExtension {
+                case "png": looksCaptured = ScreenshotDetector.isScreenshot(url)
+                case "mov": looksCaptured = ScreenshotDetector.isScreenRecording(url)
+                default:    looksCaptured = false
+                }
+                guard looksCaptured else { return false }
                 guard let values = try? url.resourceValues(forKeys: Set(keys)),
                       values.isRegularFile == true,
                       let mtime = values.contentModificationDate else { return false }
                 guard now.timeIntervalSince(mtime) <= maxAge else { return false }
-                guard ScreenshotDetector.isScreenshot(url) else { return false }
                 return !seen.isSeen(url)
             }
             .map { url in
